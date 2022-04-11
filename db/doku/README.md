@@ -1,7 +1,8 @@
-
-
+```cmd
 ssh rn@142.132.225.82
+```
 
+```txt
     4  sudo apt upgrade
     5  ps aux
     6  exit
@@ -17,39 +18,54 @@ ssh rn@142.132.225.82
    16  sudo apt install mariadb-server
    17  sudo apt --fix-broken install
    18  history
+```
 
 Quelle:
 https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04-de
 
+```bash
 sudo mysql_secure_installation
-   root password
-   none
-   yes remove anonymous
-   yes
-   yes
-   yes
+```
 
-    show databases;
+- root password
+- none
+- yes remove anonymous
+- yes
+- yes
+- yes
 
-     create database todolist;
+```mysql
+show databases;
+create database todolist;
+use todolist;
+create table main(id int auto_increment, content varchar(1000) not null, primary key(id));
 
-    use todolist; create table main(id int auto_increment, content varchar(1000) not null, primary key(id));
-
-     CREATE USER gr4@todolist IDENTIFIED BY 'Gruppe4!PI19#dhge';
-     GRANT SELECT, INSERT, DELETE ON todolist.main TO 'gr4'@'todolist';
-     exit;
-     mysql -h 142.132.225.82 -u 'gr4' -p 'Gruppe4!PI19#dhge' 'todolist' # Login mit gr4 Nutzer funktioniert nicht
-     exit;
+CREATE USER gr4@todolist IDENTIFIED BY 'Gruppe4!PI19#dhge';
+GRANT SELECT, INSERT, DELETE ON todolist.main TO 'gr4'@'todolist';
+exit;
+mysql -h 142.132.225.82 -u 'gr4' -p 'Gruppe4!PI19#dhge' 'todolist'
+# Login mit gr4 Nutzer funktioniert nicht
+exit;
+```
+Das hat nicht geklappt, richtiger User:
+```bash
 sudo mariadb;
-     drop user gr4@todolist
-     CREATE USER 'gr4'@localhost IDENTIFIED BY 'Gruppe4!PI19#dhge';
-     select user from mysql.user;
-     SHOW GRANTS FOR 'gr4'@localhost;
-     GRANT SELECT, INSERT, DELETE ON todolist.main TO 'gr4'@localhost;
-     mysql -u gr4 -p;
-     use todolist;
-     insert into main (content) VALUES ('test');
-     select * from main;
-     delete from main where id=1;
-
-ERROR 1142 (42000): CREATE command denied to user 'gr4'@'localhost' for table 'test' # Command denied
+```
+```mysql
+drop user gr4@todolist;
+CREATE USER 'gr4'@localhost IDENTIFIED BY 'Gruppe4!PI19#dhge';
+select user from mysql.user;
+SHOW GRANTS FOR 'gr4'@localhost;
+GRANT SELECT, INSERT, DELETE ON todolist.main TO 'gr4'@localhost;
+exit;
+```
+```bash
+mysql -u gr4 -p;
+```
+```mysql
+use todolist;
+insert into main (content) VALUES ('test');
+select * from main;
+delete from main where id=1;
+> ERROR 1142 (42000): CREATE command denied to user 'gr4'@'localhost' for table 'test' # Command denied
+```
