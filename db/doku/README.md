@@ -49,11 +49,7 @@ sudo mariadb;
      mysql -u gr4 -p;
      use todolist;
      insert into main (content) VALUES ('test');
+     select * from main;
+     delete from main where id=1;
 
-MariaDB [todolist]> create table test;
-ERROR 1142 (42000): CREATE command denied to user 'gr4'@'localhost' for table 'test'
-
-[11:41] G19PI-Gulla-B
-create table test;
-
- # Command denied
+ERROR 1142 (42000): CREATE command denied to user 'gr4'@'localhost' for table 'test' # Command denied
