@@ -1,12 +1,12 @@
-# mariaDB standalone
+# mariaDB standalone setup
 
-## Connection
+## Verbindungsherstellung zur VM
 
 ```cmd
 ssh rn@142.132.225.82
 ```
 
-## Installation
+## Installation mariaDB
 
 ```txt
     4  sudo apt upgrade
@@ -28,6 +28,8 @@ ssh rn@142.132.225.82
 
 [Quelle 1](https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04-de)
 
+### Security-Setup
+
 ```bash
 sudo mysql_secure_installation
 ```
@@ -41,23 +43,33 @@ sudo mysql_secure_installation
 
 ## Konfiguration
 
+### Anlegen einer Datenbank und Tabelle für die ToDo-Liste
+
 ```mysql
 show databases;
 create database todolist;
 use todolist;
 create table main(id int auto_increment, content varchar(1000) not null, primary key(id));
+```
 
+### Anlegen eines Benutzerkontos für Verwaltung der ToDo-Liste
+
+Der Benutzer soll lediglich Listenelemente hinzufügen, löschen und anzeigen können.
+
+```mysql
 CREATE USER gr4@todolist IDENTIFIED BY 'Gruppe4!PI19#dhge';
 GRANT SELECT, INSERT, DELETE ON todolist.main TO 'gr4'@'todolist';
 exit;
-mysql -h 142.132.225.82 -u 'gr4' -p 'Gruppe4!PI19#dhge' 'todolist'
-# Login mit gr4 Nutzer funktioniert nicht
-exit;
 ```
+Überprüfung des Benutzerlogins durch Eingabe von ``mysql -h 142.132.225.82 -u 'gr4' -p 'Gruppe4!PI19#dhge' 'todolist'`` schlägt fehl.
+
 Das hat nicht geklappt, richtiger User:
 ```bash
 sudo mariadb;
 ```
+
+#### Anpassung der Benutzer-"Domäne"
+
 ```mysql
 drop user gr4@todolist;
 CREATE USER 'gr4'@localhost IDENTIFIED BY 'Gruppe4!PI19#dhge';
@@ -70,14 +82,20 @@ exit;
 mysql -u gr4 -p;
 ```
 > Passwort eingeben
+
+Der Login ist nun erfolgreich. Somit kann nachfolgend überprüft werden, ob der Benutzer ausschließlich die erlaubten Funktionen nutzen darf.
+
 ```mysql
 use todolist;
 insert into main (content) VALUES ('test');
 select * from main;
 delete from main where id=1;
+create test;
 > ERROR 1142 (42000): CREATE command denied to user 'gr4'@'localhost' for table 'test' # Command denied
 ```
 ## Netzkonfig
+
+Aktuell ist die Datenbank nur lokal erreichbar. Um die Erreichbarkeit der mariaDB über das Netzwerk zu überprüfen wird konfiguriert, dass mariaDB auf allen IP-Adressen erreichbar ist.
 
 ```bash
 sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
