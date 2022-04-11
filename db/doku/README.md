@@ -20,8 +20,7 @@ ssh rn@142.132.225.82
    18  history
 ```
 
-Quelle:
-https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04-de
+[Quelle 1](https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04-de)
 
 ```bash
 sudo mysql_secure_installation
@@ -62,10 +61,32 @@ exit;
 ```bash
 mysql -u gr4 -p;
 ```
+> Passwort eingeben
 ```mysql
 use todolist;
 insert into main (content) VALUES ('test');
 select * from main;
 delete from main where id=1;
 > ERROR 1142 (42000): CREATE command denied to user 'gr4'@'localhost' for table 'test' # Command denied
+```
+## Netzkonfig
+
+```bash
+sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+```
+change
+```txt
+bind-address                              = 127.0.0.1
+```
+to
+0.0.0.0 or public Ip
+```bash
+sudo systemctl restart mysql.service
+sudo systemctl restart mariadb.service
+```
+
+[Quelle 2](https://www.digitalocean.com/community/tutorials/how-to-allow-remote-access-to-mysql)
+
+```mysql
+RENAME USER 'gr4'@localhost TO 'gr4'@'142.132.225.82';
 ```
