@@ -1,6 +1,12 @@
+# mariaDB standalone
+
+## Connection
+
 ```cmd
 ssh rn@142.132.225.82
 ```
+
+## Installation
 
 ```txt
     4  sudo apt upgrade
@@ -32,6 +38,8 @@ sudo mysql_secure_installation
 - yes
 - yes
 - yes
+
+## Konfiguration
 
 ```mysql
 show databases;
@@ -91,8 +99,9 @@ sudo systemctl restart mariadb.service
 RENAME USER 'gr4'@localhost TO 'gr4'@'142.132.225.82';
 ```
 
-## Docker
+# Docker
 
+## Installation
 [Quelle Docker](https://docs.docker.com/engine/install/ubuntu/)
 [MariaDB Image](https://hub.docker.com/r/bitnami/mariadb-galera#configuration)
 
@@ -105,5 +114,10 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o 
 
 sudo apt-get install docker-ce docker-ce-cli containerd.io
 sudo docker run hello-world
+```
+
+## mariaDB Docker
+
+```bash
 sudo docker pull bitnami/mariadb-galera:latest
 ```
