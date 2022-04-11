@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/todo")
+@RequestMapping
 class Controller(val repository: ItemRepository) {
 
     @GetMapping
-    fun get() = repository.findAll()
-
-    @GetMapping("/{id}")
-    fun getId(@PathVariable id: Long) = repository.findById(id)
+    fun getAll(): MutableIterable<Item> = repository.findAll()
 
     @PostMapping
-    fun add(@RequestBody item: Item) = repository.save(item)
+    fun addItem(@RequestBody item: Item) = repository.save(item)
+
+    @GetMapping("/{id}")
+    fun getById(@PathVariable id: Long) = repository.findById(id)
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: Long) = repository.deleteById(id)
+    fun deleteById(@PathVariable id: Long) = repository.deleteById(id)
 }
