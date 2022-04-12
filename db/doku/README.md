@@ -139,3 +139,58 @@ sudo docker run hello-world
 ```bash
 sudo docker pull bitnami/mariadb-galera:latest
 ```
+
+
+  110  sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+  111  history
+  112  sudo mariadb
+  113  sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+  114  sudo systemctl restart mysql.service
+  115  sudo systemctl restart mariadb.service
+  116  ping 87.155.206.168
+  117  echo #123
+  118  echo 123
+  119  ls
+  120  mkdir mariadbdocker
+  121  cd mariadbdocker/
+  122  touch Dockerfile
+  123  touch schema.sql
+  124  nano Dockerfile
+  125  cat Dockerfile
+  126  nano Dockerfile
+  127  ls
+  128  nano schema.sql
+  129  man docker build
+  130  docker build -f Dockerfile .
+  131  sudo docker build -f Dockerfile .
+  132  docker ps
+  133  sudo docker ps
+  134  docker images ls
+  135  sudo docker images ls
+  136  docker run 006fb496d230
+  137  sudo docker run 006fb496d230
+  138  history
+
+```txt
+FROM bitnami/mariadb-galera:latest
+ENV MARIADB_ROOT_PASSWORD=wirh4ben1SehrstarkesPasswort!!! MARIADB_ROOT_USER=admin MARIADB_USER=gr4 MARIADB_PASSWORD=Gruppe4PI19dhge2022 MARIADB_DATABASE=todolist MARIADB_GALERA_MARIABACKUP_PASSWORD=backupssindnichtueberbewertet
+WORKDIR /docker-entrypoint-initdb.d
+copy schema.sql .
+```
+
+$ sudo docker build -t mariadbtest .
+$ sudo docker run -d mariadbtest:latest
+
+sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' determined_robinson
+
+$ mysql -h 172.17.0.2 -u gr4 -p
+-> auf dem container
+
+MariaDB [todolist]> create database secondary;
+ERROR 1044 (42000): Access denied for user 'gr4'@'%' to database 'secondary'
+
+Todo:
+
+- Volume einhängen/mounten
+- IP für Container konfigurieren? oder Verbindung über Container-Namen
+- Ports
