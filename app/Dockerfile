@@ -1,6 +1,7 @@
 FROM alpine:3.15.4
 RUN apk --no-cache add openjdk11
-ARG JAR_FILE=build/libs/*.jar
-COPY ${JAR_FILE} app.jar
+COPY . .
+RUN ./gradlew bootJar --no-daemon
+RUN mv build/libs/*.jar app.jar
 ENTRYPOINT ["java","-jar", "/app.jar"]
 EXPOSE 8080
