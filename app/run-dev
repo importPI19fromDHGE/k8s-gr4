@@ -9,4 +9,4 @@ docker run --detach \
     --env MARIADB_USER=some-user \
     --env MARIADB_PASSWORD=some-pwd \
     --env MARIADB_TABLE=main \
-    k8s-gr4/app
+    k8s-gr4/app-rust

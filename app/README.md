@@ -1,8 +1,4 @@
-# k8s-gr4
-
-> TODO: \
-> disconnect from database => currently connection is just dropped... not good \
-> ![notLikeThisCat](https://cdn.discordapp.com/emojis/900341955244990504.webp?size=44&quality=lossless)
+# k8s-gr4/app-rust
 
 rust version of a simple todo rest-api using [splx](https://github.com/launchbadge/sqlx) and [actix-web](https://github.com/actix/actix-web)
 
@@ -11,11 +7,16 @@ As Setup is rustc/cargo required. It is recommended to follow this [Setup](https
 > [rustc](https://www.rust-lang.org/) => compiler | [cargo](https://doc.rust-lang.org/cargo/guide/why-cargo-exists.html) => package manager and more
 
 ## Docker
+### Linux
 Executing the `build` script will build the application in a new container with a specific image to build a [static linked executable](https://stackoverflow.com/questions/49098753/unable-to-run-a-docker-image-with-a-rust-executable). This insures that the executable can run under every environment (like an alpine image).
 After the rust build is done the image is build via the `Dockerfile`.
 
 With the `run` and `run-dev` script the container can be startet with the required predefined environment variables. These should be adjusted to the usage.
 > `run-dev` uses the --network=host flag to access the localhost, useful when the db only runs locally
+
+### Windows
+Almost the same. For Window the scripts `build-win.bat` and `run-dev-win.bat` are provided.
+Windows can't use the network flag of docker. So it has to use `host.docker.internal` as `localhost` replacement (see in `run-dev-win.bat` => MARIADB_HOST).
 
 ## Config
 The configuration is fully configured via environment variables and every variable has to be provided except `K8SGR4_PORT` which defaults to `8080` if not provided
@@ -28,7 +29,7 @@ MARIADB_USER        = <database username>
 MARIADB_PASSWORD    = <database password>
 MARIADB_TABLE       = <database table>
 ```
-Following command is an example command to execute the application without global set environment variables:
+Following command is an example command to execute the application without global set environment variables in linux:
 ```sh
 K8SGR4_LOG=info \
 K8SGR4_PORT=80 \
@@ -39,7 +40,7 @@ MARIADB_USER=some-user \
 MARIADB_TABLE=main \
 <executable>
 ```
-In development the `.env` file can be edited and the variables set inside will be provided during runtime.
+In development the `.env` file can be edited and the variables set inside will be provided during runtime. This shouldn't be used for production usage.
 
 ## Endpoints
 > adjust url/port if using provided example curl commands (depending on environment variables)

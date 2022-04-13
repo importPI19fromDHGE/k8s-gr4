@@ -6,4 +6,4 @@ docker run --rm -it --user "$(id -u)":"$(id -g)" \
     ekidd/rust-musl-builder \
     cargo build --release
 # build the docker image
-docker build -t k8s-gr4/app --rm .
+docker build -t k8s-gr4/app-rust --rm .

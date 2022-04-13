@@ -46,9 +46,15 @@ async fn main() -> std::io::Result<()> {
     let connection_uri = format!("mariadb://{}:{}@{}/{}", user, password, host, database);
     debug!("{}", connection_uri.clone());
 
-    let pool = MySqlPool::connect(connection_uri.as_str())
-        .await
-        .expect("Error while connecting to database");
+    let pool = match MySqlPool::connect(connection_uri.as_str()).await {
+        Ok(pool) => {
+            info!("Successful connected to provide database [{}]", host);
+            pool
+        },
+        Err(err) => {
+            panic!("Error while connecting to database: {:?}", err)
+        }
+    };
 
     ///////////////////////////////
     // ACTUAL REST HANDLING
@@ -74,7 +80,10 @@ async fn main() -> std::io::Result<()> {
                 .route(web::delete().to(controller::delete_by_id))
             )
     })
-    .bind(format!("127.0.0.1:{}", env::var(env_var_port).unwrap_or("8080".to_string())))?
+    // deadly for docker usage (especially on windows)
+    // when the server is bind to 127.0.0.1 instead of 0.0.0.0 it only accepts requests from the localhost
+    .bind(format!("0.0.0.0:{}", env::var(env_var_port).unwrap_or("8080".to_string())))?
     .run()
     .await
+    // fixme: disconnect from database => currently connection is just dropped... not good
 }
