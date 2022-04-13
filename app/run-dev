@@ -1,0 +1,12 @@
+#!/bin/bash
+# exec container from img
+docker run --detach \
+    --network=host \
+    --env K8SGR4_LOG=info \
+    --env K8SGR4_PORT=8080 \
+    --env MARIADB_HOST=127.0.0.1:3306 \
+    --env MARIADB_DATABASE=todolist \
+    --env MARIADB_USER=some-user \
+    --env MARIADB_PASSWORD=some-pwd \
+    --env MARIADB_TABLE=main \
+    k8s-gr4/app

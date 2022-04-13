@@ -48,7 +48,7 @@ async fn main() -> std::io::Result<()> {
 
     let pool = MySqlPool::connect(connection_uri.as_str())
         .await
-        .expect("Error during connection");
+        .expect("Error while connecting to database");
 
     ///////////////////////////////
     // ACTUAL REST HANDLING

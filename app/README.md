@@ -1,7 +1,7 @@
 # k8s-gr4
 
 > TODO: \
-> docker, disconnect from database => currently connection is just dropped... not good \
+> disconnect from database => currently connection is just dropped... not good \
 > ![notLikeThisCat](https://cdn.discordapp.com/emojis/900341955244990504.webp?size=44&quality=lossless)
 
 rust version of a simple todo rest-api using [splx](https://github.com/launchbadge/sqlx) and [actix-web](https://github.com/actix/actix-web)
@@ -9,6 +9,13 @@ rust version of a simple todo rest-api using [splx](https://github.com/launchbad
 ---
 As Setup is rustc/cargo required. It is recommended to follow this [Setup](https://www.rust-lang.org/tools/install).
 > [rustc](https://www.rust-lang.org/) => compiler | [cargo](https://doc.rust-lang.org/cargo/guide/why-cargo-exists.html) => package manager and more
+
+## Docker
+Executing the `build` script will build the application in a new container with a specific image to build a [static linked executable](https://stackoverflow.com/questions/49098753/unable-to-run-a-docker-image-with-a-rust-executable). This insures that the executable can run under every environment (like an alpine image).
+After the rust build is done the image is build via the `Dockerfile`.
+
+With the `run` and `run-dev` script the container can be startet with the required predefined environment variables. These should be adjusted to the usage.
+> `run-dev` uses the --network=host flag to access the localhost, useful when the db only runs locally
 
 ## Config
 The configuration is fully configured via environment variables and every variable has to be provided except `K8SGR4_PORT` which defaults to `8080` if not provided
@@ -45,7 +52,7 @@ In development the `.env` file can be edited and the variables set inside will b
     ```
 ### POST
 - inserts the provided json
-- example curl (tested on win)
+- example curl (json needs to be escaped via curl)
     ```sh
     curl --header "Content-Type: application/json" --request "POST" http://localhost/ --data {\"content\":\"test-todo\"}
     ```
@@ -75,6 +82,10 @@ docker run --detach\
             --env MARIADB_PASSWORD=some-pwd \
             --env MARIADB_ROOT_PASSWORD=root-pwd \
             mariadb:latest
+```
+```sh
+mysql -proot-pwd
+mysql -u some-user -psome-pwd
 ```
 mariadb simple config for some-user (for additional help see [db/doc](https://github.com/importPI19fromDHGE/k8s-gr4/tree/main/db/doku))
 ```sql
