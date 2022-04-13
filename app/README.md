@@ -3,7 +3,7 @@
 rust version of a simple todo rest-api using [splx](https://github.com/launchbadge/sqlx) and [actix-web](https://github.com/actix/actix-web)
 
 ---
-As Setup is rustc/cargo required. It is recommended to follow this [Setup](https://www.rust-lang.org/tools/install).
+For development rustc/cargo is required. It is recommended to follow this [Setup](https://www.rust-lang.org/tools/install).
 > [rustc](https://www.rust-lang.org/) => compiler | [cargo](https://doc.rust-lang.org/cargo/guide/why-cargo-exists.html) => package manager and more
 
 ## Docker
@@ -11,7 +11,7 @@ As Setup is rustc/cargo required. It is recommended to follow this [Setup](https
 Executing the `build` script will build the application in a new container with a specific image to build a [static linked executable](https://stackoverflow.com/questions/49098753/unable-to-run-a-docker-image-with-a-rust-executable). This insures that the executable can run under every environment (like an alpine image).
 After the rust build is done the image is build via the `Dockerfile`.
 
-With the `run` and `run-dev` script the container can be startet with the required predefined environment variables. These should be adjusted to the usage.
+With the `run` and `run-dev` scripts the container can be started with the required predefined environment variables. These should be adjusted for the usage.
 > `run-dev` uses the --network=host flag to access the localhost, useful when the db only runs locally
 
 ### Windows
@@ -29,7 +29,7 @@ MARIADB_USER        = <database username>
 MARIADB_PASSWORD    = <database password>
 MARIADB_TABLE       = <database table>
 ```
-Following command is an example command to execute the application without global set environment variables in linux:
+The following command is an example command to execute the application without global environment variables in linux:
 ```sh
 K8SGR4_LOG=info \
 K8SGR4_PORT=80 \
