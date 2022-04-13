@@ -1,8 +1,8 @@
 #!/bin/bash
-# compile application in a seperate container with static linking
-docker run --rm -it --user "$(id -u)":"$(id -g)" \
-    -v "$PWD":/usr/src/myapp \
-    -w /usr/src/myapp \
+# compile application in a seperate container with static linking (see image ekidd/rust-musl-builder)
+docker run --rm -it \
+    -v "$PWD":/app \
+    -w /app \
     ekidd/rust-musl-builder \
     cargo build --release
 # build the docker image
