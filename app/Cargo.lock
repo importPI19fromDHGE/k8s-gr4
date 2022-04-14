@@ -872,6 +872,7 @@ dependencies = [
  "futures",
  "log",
  "serde",
+ "serde_json",
  "sqlx",
 ]
 

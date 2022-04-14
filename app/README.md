@@ -96,3 +96,9 @@ FLUSH PRIVILEGES;
 USE todolist;
 CREATE TABLE main(id INT auto_increment, content VARCHAR(1000) NOT NULL, PRIMARY KEY(id));
 ```
+### Tests
+In a linux dev environment u can run `./test <url> <id>`:
+```sh
+./test localhost:8080 6
+```
+The first parameter represents the url of the running container and the second parameter is the id to query and delete.

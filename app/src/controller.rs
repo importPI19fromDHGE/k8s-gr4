@@ -27,7 +27,7 @@ pub async fn insert_todo(service: web::Data<crate::ItemService>, item: web::Json
     match web::block(move || async move { service.add_item(item.content.clone()).await}).await {
         Ok(result) => resolve_result!(result.await),
         Err(e) => {
-            println!("Error while getting, {:?}", e);
+            error!("Error while getting, {:?}", e);
             HttpResponse::InternalServerError().finish()
         }
     }

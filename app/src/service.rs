@@ -5,18 +5,19 @@ use serde::{Serialize, Deserialize};
 use sqlx::MySqlPool;
 use futures::TryStreamExt;
 
+macro_rules! json_error {
+    ($e:expr) => {
+        Err ( serde_json::json!({ "error": $e.to_string() }) )
+    };
+}
+
 macro_rules! resolve_err {
     ( $e:expr ) => {
         match $e {
             Ok(x) => x,
-            Err(err) => return  Err( QueryError { error: err.to_string() } ),
+            Err(err) => return json_error!(err.to_string()),
         }
     }
-}
-
-#[derive(Serialize)]
-pub struct QueryError {
-    error: String
 }
 
 #[derive(sqlx::FromRow, Serialize, Deserialize, Debug)]
@@ -39,7 +40,7 @@ impl ItemService {
     }
 
     /// retrieves all entries of self.table
-    pub async fn get_items(&self) -> Result<Vec<Item>, QueryError> {
+    pub async fn get_items(&self) -> Result<Vec<Item>, serde_json::Value> {
         let query = format!("SELECT * FROM {};", self.table);
         let mut rows = sqlx::query_as::<_, Item>(query.as_str())
             .fetch(&self.pool);
@@ -53,7 +54,7 @@ impl ItemService {
     }
 
     /// adds an entry in self.table with the provided context
-    pub async fn add_item(&self, content: String) -> Result<Item, QueryError> {
+    pub async fn add_item(&self, content: String) -> Result<Item, serde_json::Value> {
         let query = format!("INSERT INTO {} (content) VALUES ('{}');", self.table, content);
         // execute query and get last inserted id to return it
         let id = resolve_err!(sqlx::query(query.as_str())
@@ -63,12 +64,12 @@ impl ItemService {
         // conversion of u64 to i64, on fail throw error
         match i64::try_from(id) {
             Ok(id) => Ok( Item { id: Some(id), content } ),
-            Err(err) => Err( QueryError { error: err.to_string() } )
+            Err(err) => json_error!(err.to_string())
         }
     }
 
     /// retrieves item by provided id from self.table
-    pub async fn get_item_by_id(&self, id: String) -> Result<Item, QueryError> {
+    pub async fn get_item_by_id(&self, id: String) -> Result<Item, serde_json::Value> {
         let query = format!("SELECT * FROM {} WHERE ID = {};", self.table, id);
         let mut rows =
             sqlx::query_as::<_, Item>(query.as_str())
@@ -81,16 +82,16 @@ impl ItemService {
                 // checks if item was available
                 match op_item {
                     Some(item) => Ok(item),
-                    None => Err( QueryError { error: String::from("No SQL Error but no item was found to the given id") } )
+                    None => json_error!("No SQL Error but no item was found to the given id".to_string())
                 }
             },
-            Err(err) => Err( QueryError { error: err.to_string() } )
+            Err(err) => json_error!(err.to_string())
         }
 
     }
 
     /// deletes item by provided id from self.table
-    pub async fn delete_item_by_id(&self, id: String) -> Result<QueryError, QueryError> {
+    pub async fn delete_item_by_id(&self, id: String) -> Result<serde_json::Value, serde_json::Value> {
         let query = format!("DELETE FROM {} WHERE ID = {};", self.table, id);
         let affected = resolve_err!(sqlx::query(query.as_str())
                 .execute(&self.pool)
@@ -99,9 +100,9 @@ impl ItemService {
         debug!("deleted [{}] rows", affected);
 
         if affected == 1 {
-            Ok( QueryError { error: String::new() } )
+            Ok( serde_json::json!({}) )
         } else {
-            Err( QueryError { error: String::from("No SQL Error but no row was effected") } )
+            json_error!("No SQL Error but no row was effected".to_string())
         }
     }
 }

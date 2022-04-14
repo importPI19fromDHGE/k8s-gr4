@@ -12,3 +12,4 @@ sqlx = { version = "0.5", features = [ "runtime-actix-native-tls" , "mysql" ] }
 actix-web = "4"
 futures = "0.3"
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "*"

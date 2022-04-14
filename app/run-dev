@@ -2,7 +2,7 @@
 # exec container from img
 docker run -p 8080:8080 \
     --detach \
-    --add-host=host.docker.internal:host-gateway \ # workaround to get same behavior as in windows/macos
+    --add-host=host.docker.internal:host-gateway \
     --name k8s-gr4-dev \
     --env K8SGR4_LOG=debug \
     --env K8SGR4_PORT=8080 \
