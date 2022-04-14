@@ -134,8 +134,43 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
 sudo docker run hello-world
 ```
 
-## mariaDB Docker
+## mariaDB mit Docker
+
+siehe Files
 
 ```bash
-sudo docker pull bitnami/mariadb-galera:latest
+$ mkdir mariadbdocker
+$ cd mariadbdocker/
+$ touch Dockerfile
+$ touch schema.sql
+$ nano Dockerfile
 ```
+
+```bash
+$ sudo docker build -f Dockerfile .
+$ sudo docker run 006fb496d230
+$ sudo docker build -t mariadbtest .
+$ sudo docker run -d mariadbtest:latest
+$ sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' determined_robinson
+$ mysql -h 172.17.0.2 -u gr4 -p
+```
+
+```mysql
+MariaDB [todolist]> create database secondary;
+ERROR 1044 (42000): Access denied for user 'gr4'@'%' to database 'secondary'
+```
+
+Volume nutzen - Persistente Daten
+
+```
+sudo docker run -d -v mydatabasevolume:/bitnami/mariadb/ mariadbtest:latest
+sudo docker inspect mydatabasevolume
+```
+
+Files executable nicht vergessen!
+
+```bash
+chmod +x ./deploy.sh
+chmod +x gradlew #Gradle wurde zu einem früheren Zeitpunkt benutzt.
+```
+
