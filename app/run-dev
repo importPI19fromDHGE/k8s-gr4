@@ -1,0 +1,14 @@
+#!/bin/bash
+# exec container from img
+docker run -p 8080:8080 \
+    --detach \
+    --add-host=host.docker.internal:host-gateway \ # workaround to get same behavior as in windows/macos
+    --name k8s-gr4-dev \
+    --env K8SGR4_LOG=debug \
+    --env K8SGR4_PORT=8080 \
+    --env MARIADB_HOST=host.docker.internal:3306 \
+    --env MARIADB_DATABASE=todolist \
+    --env MARIADB_USER=some-user \
+    --env MARIADB_PASSWORD=some-pwd \
+    --env MARIADB_TABLE=main \
+    k8s-gr4/app-rust
