@@ -134,7 +134,9 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
 sudo docker run hello-world
 ```
 
-## mariaDB Docker
+## mariaDB mit Docker
+
+siehe Files
 
 ```bash
 $ mkdir mariadbdocker
@@ -143,19 +145,7 @@ $ touch Dockerfile
 $ touch schema.sql
 $ nano Dockerfile
 ```
-```txt
-FROM bitnami/mariadb-galera:latest
-ENV MARIADB_ROOT_PASSWORD=wirh4ben1SehrstarkesPasswort!!! MARIADB_ROOT_USER=admin MARIADB_USER=gr4 MARIADB_PASSWORD=Gruppe4PI19dhge2022 MARIADB_DATABASE=todolist MARIADB_GALERA_MARIABACKUP_PASSWORD=backupssindnichtueberbewertet
-WORKDIR /docker-entrypoint-initdb.d
-copy schema.sql .
-```
-```bash
-$ nano schema.sql
-```
-```sql
-create table main(id int auto_increment, content varchar(255) not null, primary key(id));
-GRANT SELECT, INSERT, DELETE ON todolist.main TO 'gr4';
-```
+
 ```bash
 $ sudo docker build -f Dockerfile .
 $ sudo docker run 006fb496d230
@@ -164,20 +154,23 @@ $ sudo docker run -d mariadbtest:latest
 $ sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' determined_robinson
 $ mysql -h 172.17.0.2 -u gr4 -p
 ```
+
 ```mysql
 MariaDB [todolist]> create database secondary;
 ERROR 1044 (42000): Access denied for user 'gr4'@'%' to database 'secondary'
 ```
-Todo:
 
-- Volume einhängen/mounten
-- Verbindung über Container-Namen: docker network
-- Ports
+Volume nutzen - Persistente Daten
 
-
+```
 sudo docker run -d -v mydatabasevolume:/bitnami/mariadb/ mariadbtest:latest
- sudo docker inspect mydatabasevolume
+sudo docker inspect mydatabasevolume
+```
 
---------------------------
+Files executable nicht vergessen!
+
+```bash
 chmod +x ./deploy.sh
-chmod +x gradlew
+chmod +x gradlew #Gradle wurde zu einem früheren Zeitpunkt benutzt.
+```
+
