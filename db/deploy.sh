@@ -1,2 +1,2 @@
-docker build -t k8smariadb .
-docker run -d -v mydatabasevolume:/bitnami/mariadb/ k8smariadb:latest
+docker build -t k8s-gr4/db .
+docker run -d -v mydatabasevolume:/bitnami/mariadb/ k8s-gr4/db:latest

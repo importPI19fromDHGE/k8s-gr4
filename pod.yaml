@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: app
-    image: k8s-gr4/rust-app
+    image: k8s-gr4/app-rust
     imagePullPolicy: Never
     ports:
     - containerPort: 8080
@@ -35,6 +35,8 @@ spec:
     ports:
     - containerPort: 3036
     env:
+    - name: "MARIADB_DATABASE"
+      value: todolist
     - name: "MARIADB_USER"
       value: "some-user"
     - name: "MARIADB_PASSWORD"
