@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-g4-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: k8s-g4-app
+  template:
+    metadata:
+      labels:
+        app: k8s-g4-app
+    spec:
+      volumes:
+      - name: vol
+        emptyDir: {}
+      containers:
+      - name: app
+        image: k8s-gr4/app-rust
+        imagePullPolicy: Never
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+          name: web
+        env:
+        - name: K8SGR4_LOG
+          value: info
+        - name: K8SGR4_PORT
+          value: "8080"
+        - name: MARIADB_HOST
+          value: 127.0.0.1:3306
+        - name: MARIADB_DATABASE
+          value: todolist
+        - name: MARIADB_USER
+          value: some-user
+        - name: MARIADB_PASSWORD
+          value: some-pwd
+        - name: MARIADB_TABLE
+          value: main
+      - name: db
+        image: k8s-gr4/db
+        imagePullPolicy: Never
+        env:
+        - name: "MARIADB_DATABASE"
+          value: todolist
+        - name: "MARIADB_USER"
+          value: "some-user"
+        - name: "MARIADB_PASSWORD"
+          value: "some-pwd"
+        - name: "MARIADB_ROOT_PASSWORD"
+          value: "root-pwd"
+        volumeMounts:
+        - mountPath: /bitnami/mariadb/
+          name: vol
+        ports:
+        - containerPort: 3036
+          name: web
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
