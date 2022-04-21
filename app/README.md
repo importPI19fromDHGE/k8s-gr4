@@ -16,34 +16,39 @@ With the `run` and `run-dev` scripts the container can be started with the requi
 
 ### Windows
 Almost the same. For Window the scripts `build-win.bat` and `run-dev-win.bat` are provided.
-Windows can't use the network flag of docker. So it has to use `host.docker.internal` as `localhost` replacement (see in `run-dev-win.bat` => MARIADB_HOST).
+Windows can't use the network flag of docker. So it has to use `host.docker.internal` as `localhost` replacement (see in `run-dev-win.bat` => POOL_HOST).
 
 ## Config
-The configuration is fully configured via environment variables and every variable has to be provided except `K8SGR4_PORT` which defaults to `8080` if not provided
+The configuration is fully configured via environment variables and every `POOL_` variable has to be provided
+
+All `APP_` variables have a default option (LOG = info, PORT = 80808, SECRET = )
 ```
-K8SGR4_LOG          = <debug level -> info | debug | trace | error>
-K8SGR4_PORT         = <port for the rest-api to run on>
-MARIADB_DATABASE    = <database name>
-MARIADB_HOST        = <database host>:<database port>
-MARIADB_USER        = <database username>
-MARIADB_PASSWORD    = <database password>
-MARIADB_TABLE       = <database table>
+APP_LOG          = <debug level -> info | debug | trace | error>
+APP_PORT         = <port for the rest-api to run on>
+APP_SECRET       = <secret to access the api>
+POOL_DATABASE    = <database name>
+POOL_HOST        = <database host>:<database port>
+POOL_USER        = <database username>
+POOL_PASSWORD    = <database password>
+POOL_TABLE       = <database table>
 ```
 The following command is an example command to execute the application without global environment variables in linux:
 ```sh
-K8SGR4_LOG=info \
-K8SGR4_PORT=80 \
-MARIADB_DATABASE=todolist \
-MARIADB_HOST=localhost:3306 \
-MARIADB_PASSWORD=some-pwd \
-MARIADB_USER=some-user \
-MARIADB_TABLE=main \
+APP_LOG=info \
+APP_PORT=8080 \
+POOL_DATABASE=todolist \
+POOL_HOST=localhost:3306 \
+POOL_PASSWORD=some-pwd \
+POOL_USER=some-user \
+POOL_TABLE=main \
 <executable>
 ```
 In development the `.env` file can be edited and the variables set inside will be provided during runtime. This shouldn't be used for production usage.
 
 ## Endpoints
 > adjust url/port if using provided example curl commands (depending on environment variables)
+
+> when app is launched with APP_SECRET `--header "Authorized: <secret>"` should be provided with the configured secret
 ### `/`
 ----
 ### GET
@@ -55,7 +60,7 @@ In development the `.env` file can be edited and the variables set inside will b
 - inserts the provided json
 - example curl (json needs to be escaped via curl)
     ```sh
-    curl --header "Content-Type: application/json" --request "POST" http://localhost/ --data {\"content\":\"test-todo\"}
+    curl --header "Content-Type: application/json" --request "POST" http://localhost:8080/ --data {\"content\":\"test-todo\"}
     ```
     - spaces and surrounding quotation marks result in errors (seems more like a curl problem maybe)
 
@@ -79,9 +84,9 @@ docker mariadb database
 docker run --detach\
             --name some-mariadb \
             -p 3306:3306 \
-            --env MARIADB_USER=some-user \
-            --env MARIADB_PASSWORD=some-pwd \
-            --env MARIADB_ROOT_PASSWORD=root-pwd \
+            --env POOL_USER=some-user \
+            --env POOL_PASSWORD=some-pwd \
+            --env POOL_ROOT_PASSWORD=root-pwd \
             mariadb:latest
 ```
 ```sh
@@ -97,8 +102,8 @@ USE todolist;
 CREATE TABLE main(id INT auto_increment, content VARCHAR(1000) NOT NULL, PRIMARY KEY(id));
 ```
 ### Tests
-In a linux dev environment u can run `./test <url> <id>`:
+In a linux dev environment u can run `./test <url> <id> <secret>`:
 ```sh
-./test localhost:8080 6
+./test localhost:8080 6 some-secret
 ```
-The first parameter represents the url of the running container and the second parameter is the id to query and delete.
+The first parameter represents the url of the running container, the second parameter is the id to query and delete and the third the secret if configured.
