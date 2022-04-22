@@ -53,6 +53,8 @@ spec:
           value: "some-pwd"
         - name: "MARIADB_ROOT_PASSWORD"
           value: "root-pwd"
+        # - name: "wsrep_cluster_address"
+        #   value: "db"
         volumeMounts:
         - mountPath: /bitnami/mariadb/
           name: vol
@@ -63,3 +65,16 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+spec:
+  selector:
+    app: k8s-g4-app
+  ports:
+  - port: 80
+    targetPort: 8080
