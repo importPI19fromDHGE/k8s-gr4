@@ -16,31 +16,31 @@ With the `run` and `run-dev` scripts the container can be started with the requi
 
 ### Windows
 Almost the same. For Window the scripts `build-win.bat` and `run-dev-win.bat` are provided.
-Windows can't use the network flag of docker. So it has to use `host.docker.internal` as `localhost` replacement (see in `run-dev-win.bat` => POOL_HOST).
+Windows can't use the network flag of docker. So it has to use `host.docker.internal` as `localhost` replacement (see in `run-dev-win.bat` => MARIADB_HOST).
 
 ## Config
-The configuration is fully configured via environment variables and every `POOL_` variable has to be provided
+The configuration is fully configured via environment variables and every `MARIADB_` variable has to be provided
 
-All `APP_` variables have a default option (LOG = info, PORT = 80808, SECRET = )
+All `K8SGR4_` variables have a default option (LOG = info, PORT = 80808, SECRET = )
 ```
-APP_LOG          = <debug level -> info | debug | trace | error>
-APP_PORT         = <port for the rest-api to run on>
-APP_SECRET       = <secret to access the api>
-POOL_DATABASE    = <database name>
-POOL_HOST        = <database host>:<database port>
-POOL_USER        = <database username>
-POOL_PASSWORD    = <database password>
-POOL_TABLE       = <database table>
+K8SGR4_LOG          = <debug level -> info | debug | trace | error>
+K8SGR4_PORT         = <port for the rest-api to run on>
+K8SGR4_SECRET       = <secret to access the api>
+MARIADB_DATABASE    = <database name>
+MARIADB_HOST        = <database host>:<database port>
+MARIADB_USER        = <database username>
+MARIADB_PASSWORD    = <database password>
+MARIADB_TABLE       = <database table>
 ```
 The following command is an example command to execute the application without global environment variables in linux:
 ```sh
-APP_LOG=info \
-APP_PORT=8080 \
-POOL_DATABASE=todolist \
-POOL_HOST=localhost:3306 \
-POOL_PASSWORD=some-pwd \
-POOL_USER=some-user \
-POOL_TABLE=main \
+K8SGR4_LOG=info \
+K8SGR4_PORT=8080 \
+MARIADB_DATABASE=todolist \
+MARIADB_HOST=localhost:3306 \
+MARIADB_PASSWORD=some-pwd \
+MARIADB_USER=some-user \
+MARIADB_TABLE=main \
 <executable>
 ```
 In development the `.env` file can be edited and the variables set inside will be provided during runtime. This shouldn't be used for production usage.
@@ -48,7 +48,7 @@ In development the `.env` file can be edited and the variables set inside will b
 ## Endpoints
 > adjust url/port if using provided example curl commands (depending on environment variables)
 
-> when app is launched with APP_SECRET `--header "Authorized: <secret>"` should be provided with the configured secret
+> when app is launched with K8SGR4_SECRET `--header "Authorized: <secret>"` should be provided with the configured secret
 ### `/`
 ----
 ### GET
@@ -84,9 +84,9 @@ docker mariadb database
 docker run --detach\
             --name some-mariadb \
             -p 3306:3306 \
-            --env POOL_USER=some-user \
-            --env POOL_PASSWORD=some-pwd \
-            --env POOL_ROOT_PASSWORD=root-pwd \
+            --env MARIADB_USER=some-user \
+            --env MARIADB_PASSWORD=some-pwd \
+            --env MARIADB_ROOT_PASSWORD=root-pwd \
             mariadb:latest
 ```
 ```sh

@@ -4,7 +4,6 @@ pub mod config;
 pub mod middleware;
 
 use log::{info, debug};
-use dotenv::dotenv;
 use sqlx::MySqlPool;
 use actix_web::{App, HttpServer, web::Data, middleware::Logger};
 
@@ -12,10 +11,6 @@ use crate::config::ApplicationConfig;
 
 #[actix_web::main]
 async fn main() {
-    // setup logger and dotenv
-    dotenv().ok();
-    env_logger::init_from_env(env_logger::Env::new().filter_or("K8SGR4_LOG","info"));
-
     let config = ApplicationConfig::from_env();
 
     // Connect to given Database (mariaDB here)
