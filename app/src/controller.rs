@@ -1,56 +1,63 @@
-use actix_web::{web, Responder, HttpResponse};
 use log::error;
+use actix_web::{get, post, delete, web::{self, Data, ServiceConfig}, Responder, HttpResponse};
+use sqlx::{Pool, MySql};
 
-macro_rules! resolve_result {
-    ( $e:expr ) => {
-        match $e {
-            Ok(x) => HttpResponse::Ok().json(x),
-            Err(err) => HttpResponse::BadRequest().json(err),
+use crate::{config::ApplicationConfig, service::SqlItemService};
+
+macro_rules! await_sql {
+    ($e:expr) => {
+        match web::block(move || async move { $e.await }).await {
+            Ok(result) => match result.await {
+                Ok(x) => HttpResponse::Ok().json(x),
+                Err(err) => HttpResponse::BadRequest().json(err),
+            }
+            Err(e) => {
+                error!("Error while getting, {:?}", e);
+                HttpResponse::InternalServerError().finish()
+            }
         }
-    }
+    };
 }
 
+//
+// in the following fn's, parameters with Data<> can be use due to the configuration of the application (see main)
+//
+
+#[get("/")]
 /// get all entries => /
-pub async fn get_all(service: web::Data<crate::ItemService>) -> impl Responder {
-    match web::block(move || async move { service.get_items().await }).await {
-        Ok(result) => resolve_result!(result.await),
-        Err(e) => {
-            error!("Error while getting, {:?}", e);
-            HttpResponse::InternalServerError().finish()
-        }
-    }
+async fn get_all( pool: Data<Pool<MySql>>, cfg: Data<ApplicationConfig> ) -> impl Responder {
+    await_sql!(SqlItemService::get_items(&pool, cfg.table.clone()))
 }
 
+#[post("/")]
 /// insert by given path id with provided body => /
-/// requires {"content":"<text>"}, if id is provided it will get ignored
-pub async fn insert_todo(service: web::Data<crate::ItemService>, item: web::Json<crate::service::Item>) -> impl Responder {
-    match web::block(move || async move { service.add_item(item.content.clone()).await}).await {
-        Ok(result) => resolve_result!(result.await),
-        Err(e) => {
-            error!("Error while getting, {:?}", e);
-            HttpResponse::InternalServerError().finish()
-        }
-    }
+/// requires {"content":"<text>"}, provided id will get ignored but isn't forbidden
+async fn insert_todo( pool: Data<Pool<MySql>>, cfg: Data<ApplicationConfig>,
+    item: web::Json<crate::service::Item>
+) -> impl Responder {
+    await_sql!(SqlItemService::add_item(&pool, cfg.table.clone(), item.content.clone()))
 }
 
+#[get("/{id}")]
 /// get item by given path id => /{id}
-pub async fn get_by_id(service: web::Data<crate::ItemService>, id: web::Path<String>) -> impl Responder {
-    match web::block(move || async move { service.get_item_by_id(id.to_string()).await }).await {
-        Ok(result) => resolve_result!(result.await),
-        Err(e) => {
-            error!("Error while getting, {:?}", e);
-            HttpResponse::InternalServerError().finish()
-        }
-    }
+async fn get_by_id( pool: Data<Pool<MySql>>, cfg: Data<ApplicationConfig>,
+    id: web::Path<String>
+) -> impl Responder {
+    await_sql!(SqlItemService::get_item_by_id(&pool, cfg.table.clone(), id.to_string()))
 }
 
+#[delete("/{id}")]
 /// delete by given path id => /{id}
-pub async fn delete_by_id(service: web::Data<crate::ItemService>, id: web::Path<String>) -> impl Responder {
-    match web::block(move || async move { service.delete_item_by_id(id.to_string()).await}).await {
-        Ok(result) => resolve_result!(result.await),
-        Err(e) => {
-            error!("Error while getting, {:?}", e);
-            HttpResponse::InternalServerError().finish()
-        }
-    }
+async fn delete_by_id( pool: Data<Pool<MySql>>, cfg: Data<ApplicationConfig>,
+    id: web::Path<String>
+) -> impl Responder {
+    await_sql!(SqlItemService::delete_item_by_id(&pool, cfg.table.clone(), id.to_string()))
+}
+
+pub fn service_config( cfg: &mut ServiceConfig ) {
+    cfg
+        .service(get_all)
+        .service(insert_todo)
+        .service(get_by_id)
+        .service(delete_by_id);
 }

@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 
 use log::debug;
 use serde::{Serialize, Deserialize};
-use sqlx::MySqlPool;
+use sqlx::{Pool, MySql};
 use futures::TryStreamExt;
 
 macro_rules! json_error {
@@ -27,23 +27,19 @@ pub struct Item {
 }
 
 #[derive(Clone)]
-pub struct ItemService {
-    pub pool: MySqlPool,
-    pub table: String
-}
+pub struct SqlItemService;
 
-// query in each fn (except new) is executed or fetched depending on the method
+// query in each fn is executed or fetched depending on the method
 // handling is solved via macro resolve_err or individually for each fn
-impl ItemService {
-    pub fn new(pool: MySqlPool, table: String) -> ItemService {
-        ItemService { pool, table }
-    }
-
+impl SqlItemService {
     /// retrieves all entries of self.table
-    pub async fn get_items(&self) -> Result<Vec<Item>, serde_json::Value> {
-        let query = format!("SELECT * FROM {};", self.table);
+    pub async fn get_items(
+        pool: &Pool<MySql>,
+        table: String
+    ) -> Result<Vec<Item>, serde_json::Value> {
+        let query = format!("SELECT * FROM {};", table);
         let mut rows = sqlx::query_as::<_, Item>(query.as_str())
-            .fetch(&self.pool);
+            .fetch(pool);
         let mut items: Vec<Item> = Vec::new();
         // resolve the next row until next is None, on error returns QueryError (see resolve_err)
         while let Some(row) = resolve_err!(rows.try_next().await) {
@@ -54,11 +50,15 @@ impl ItemService {
     }
 
     /// adds an entry in self.table with the provided context
-    pub async fn add_item(&self, content: String) -> Result<Item, serde_json::Value> {
-        let query = format!("INSERT INTO {} (content) VALUES ('{}');", self.table, content);
+    pub async fn add_item(
+        pool: &Pool<MySql>,
+        table: String,
+        content: String
+    ) -> Result<Item, serde_json::Value> {
+        let query = format!("INSERT INTO {} (content) VALUES ('{}');", table, content);
         // execute query and get last inserted id to return it
         let id = resolve_err!(sqlx::query(query.as_str())
-            .execute(&self.pool)
+            .execute(pool)
             .await)
             .last_insert_id();
         // conversion of u64 to i64, on fail throw error
@@ -69,11 +69,15 @@ impl ItemService {
     }
 
     /// retrieves item by provided id from self.table
-    pub async fn get_item_by_id(&self, id: String) -> Result<Item, serde_json::Value> {
-        let query = format!("SELECT * FROM {} WHERE ID = {};", self.table, id);
+    pub async fn get_item_by_id(
+        pool: &Pool<MySql>,
+        table: String,
+        id: String
+    ) -> Result<Item, serde_json::Value> {
+        let query = format!("SELECT * FROM {} WHERE ID = {};", table, id);
         let mut rows =
             sqlx::query_as::<_, Item>(query.as_str())
-                .fetch(&self.pool);
+                .fetch(pool);
 
         // gets first matching row if query was successful
         match rows.try_next().await {
@@ -87,14 +91,17 @@ impl ItemService {
             },
             Err(err) => json_error!(err.to_string())
         }
-
     }
 
     /// deletes item by provided id from self.table
-    pub async fn delete_item_by_id(&self, id: String) -> Result<serde_json::Value, serde_json::Value> {
-        let query = format!("DELETE FROM {} WHERE ID = {};", self.table, id);
+    pub async fn delete_item_by_id(
+        pool: &Pool<MySql>,
+        table: String,
+        id: String
+    ) -> Result<serde_json::Value, serde_json::Value> {
+        let query = format!("DELETE FROM {} WHERE ID = {};", table, id);
         let affected = resolve_err!(sqlx::query(query.as_str())
-                .execute(&self.pool)
+                .execute(pool)
                 .await)
                 .rows_affected();
         debug!("deleted [{}] rows", affected);

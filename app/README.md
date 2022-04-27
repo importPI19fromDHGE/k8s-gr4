@@ -19,10 +19,13 @@ Almost the same. For Window the scripts `build-win.bat` and `run-dev-win.bat` ar
 Windows can't use the network flag of docker. So it has to use `host.docker.internal` as `localhost` replacement (see in `run-dev-win.bat` => MARIADB_HOST).
 
 ## Config
-The configuration is fully configured via environment variables and every variable has to be provided except `K8SGR4_PORT` which defaults to `8080` if not provided
+The configuration is fully configured via environment variables and every `MARIADB_` variable has to be provided
+
+All `K8SGR4_` variables have a default option (LOG = info, PORT = 80808, SECRET = )
 ```
 K8SGR4_LOG          = <debug level -> info | debug | trace | error>
 K8SGR4_PORT         = <port for the rest-api to run on>
+K8SGR4_SECRET       = <secret to access the api>
 MARIADB_DATABASE    = <database name>
 MARIADB_HOST        = <database host>:<database port>
 MARIADB_USER        = <database username>
@@ -32,7 +35,7 @@ MARIADB_TABLE       = <database table>
 The following command is an example command to execute the application without global environment variables in linux:
 ```sh
 K8SGR4_LOG=info \
-K8SGR4_PORT=80 \
+K8SGR4_PORT=8080 \
 MARIADB_DATABASE=todolist \
 MARIADB_HOST=localhost:3306 \
 MARIADB_PASSWORD=some-pwd \
@@ -44,6 +47,8 @@ In development the `.env` file can be edited and the variables set inside will b
 
 ## Endpoints
 > adjust url/port if using provided example curl commands (depending on environment variables)
+
+> when app is launched with K8SGR4_SECRET `--header "Authorized: <secret>"` should be provided with the configured secret
 ### `/`
 ----
 ### GET
@@ -55,7 +60,7 @@ In development the `.env` file can be edited and the variables set inside will b
 - inserts the provided json
 - example curl (json needs to be escaped via curl)
     ```sh
-    curl --header "Content-Type: application/json" --request "POST" http://localhost/ --data {\"content\":\"test-todo\"}
+    curl --header "Content-Type: application/json" --request "POST" http://localhost:8080/ --data {\"content\":\"test-todo\"}
     ```
     - spaces and surrounding quotation marks result in errors (seems more like a curl problem maybe)
 
@@ -97,8 +102,8 @@ USE todolist;
 CREATE TABLE main(id INT auto_increment, content VARCHAR(1000) NOT NULL, PRIMARY KEY(id));
 ```
 ### Tests
-In a linux dev environment u can run `./test <url> <id>`:
+In a linux dev environment u can run `./test <url> <id> <secret>`:
 ```sh
-./test localhost:8080 6
+./test localhost:8080 6 some-secret
 ```
-The first parameter represents the url of the running container and the second parameter is the id to query and delete.
+The first parameter represents the url of the running container, the second parameter is the id to query and delete and the third the secret if configured.

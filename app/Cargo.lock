@@ -870,6 +870,7 @@ dependencies = [
  "dotenv",
  "env_logger",
  "futures",
+ "futures-util",
  "log",
  "serde",
  "serde_json",
