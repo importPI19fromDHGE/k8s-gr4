@@ -1,3 +1,10 @@
 FROM scratch
 COPY target/x86_64-unknown-linux-musl/release/k8s-gr4 /k8s-gr4
+ENV K8SGR4_LOG=info
+ENV K8SGR4_PORT=8080
+ENV MARIADB_HOST=127.0.0.1:3306
+ENV MARIADB_DATABASE=todolist
+ENV MARIADB_USER=some-user
+ENV MARIADB_PASSWORD=some-pwd
+ENV MARIADB_TABLE=main
 ENTRYPOINT ["/k8s-gr4"]

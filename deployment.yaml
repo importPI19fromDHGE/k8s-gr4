@@ -1,80 +1,77 @@
+# https://www.haproxy.com/documentation/kubernetes/latest/usage/ingress/
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: k8s-g4-app
+  name: k8sgr4
+  labels: 
+    app: k8sgr4
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: k8s-g4-app
+      app: k8sgr4
   template:
     metadata:
       labels:
-        app: k8s-g4-app
+        app: k8sgr4
     spec:
       volumes:
       - name: vol
         emptyDir: {}
       containers:
-      - name: app
-        image: k8s-gr4/app-rust
-        imagePullPolicy: Never
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 8080
-          name: web
-        env:
-        - name: K8SGR4_LOG
-          value: info
-        - name: K8SGR4_PORT
-          value: "8080"
-        - name: MARIADB_HOST
-          value: 127.0.0.1:3306
-        - name: MARIADB_DATABASE
-          value: todolist
-        - name: MARIADB_USER
-          value: some-user
-        - name: MARIADB_PASSWORD
-          value: some-pwd
-        - name: MARIADB_TABLE
-          value: main
-      - name: db
-        image: k8s-gr4/db
-        imagePullPolicy: Never
-        env:
-        - name: "MARIADB_DATABASE"
-          value: todolist
-        - name: "MARIADB_USER"
-          value: "some-user"
-        - name: "MARIADB_PASSWORD"
-          value: "some-pwd"
-        - name: "MARIADB_ROOT_PASSWORD"
-          value: "root-pwd"
-        # - name: "wsrep_cluster_address"
-        #   value: "db"
-        volumeMounts:
-        - mountPath: /bitnami/mariadb/
-          name: vol
-        ports:
-        - containerPort: 3036
-          name: web
-        resources:
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-
+        - name: app
+          image: k8s-gr4/app-rust
+          imagePullPolicy: Never
+          ports:
+          - containerPort: 8080
+            name: api
+        - name: db
+          image: k8s-gr4/db
+          imagePullPolicy: Never
+          volumeMounts:
+          - mountPath: /bitnami/mariadb/
+            name: vol
+          ports:
+          - containerPort: 3036
+            name: db
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: myapp
+  name: k8sgr4-service
 spec:
+  type: NodePort
   selector:
-    app: k8s-g4-app
+    app: k8sgr4
   ports:
-  - port: 80
+  - name: api
+    protocol: TCP
+    port: 8080 # gets trashed by the ingress (doesn't matter what it is)
     targetPort: 8080
+---
+
+# install the haproxy ingress controller
+# kubectl apply -f https://raw.githubusercontent.com/haproxytech/kubernetes-ingress/v1.7/deploy/haproxy-ingress.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: k8sgr4-ingress
+  labels:
+    app: k8sgr4
+  annotations:
+    haproxy.org/path-rewrite: "/"
+    kubernetes.io/ingress.class: haproxy
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /api # this doesn't seem to affect some routing?
+        pathType: Prefix
+        backend:
+          service:
+            name: k8sgr4-service
+            port: 
+              number: 8080
