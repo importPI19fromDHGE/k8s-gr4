@@ -29,6 +29,9 @@ spec:
         - name: db
           image: k8s-gr4/db
           imagePullPolicy: Never
+          env:
+            - name: DISCOVERY_SERVICE
+              value: etcd-client:2379
           volumeMounts:
           - mountPath: /bitnami/mariadb/
             name: vol

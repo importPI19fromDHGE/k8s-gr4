@@ -19,6 +19,8 @@ cd ..
 # uncomment if this is required -> install haproxy ingress
 # kubectl apply -f https://raw.githubusercontent.com/haproxytech/kubernetes-ingress/v1.7/deploy/haproxy-ingress.yaml
 
+kubectl create -f etcd-cluster.yml
+
 kubectl delete -f deployment.yaml
 kubectl create -f deployment.yaml
 
