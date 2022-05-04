@@ -1,4 +1,5 @@
 # copied from https://github.com/severalnines/galera-docker-mariadb
+
 apiVersion: v1
 kind: Service
 metadata:
