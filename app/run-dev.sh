@@ -1,14 +1,21 @@
 #!/bin/bash
-# exec container from img
+id=$(docker container ls -a --filter name=k8s-gr4-app-dev -q)
+if [ "$id" != "" ]
+then
+    docker container stop $id
+    docker container rm $id
+fi
+
+# exec container from image
 docker run -p 8080:8080 \
     --detach \
     --add-host=host.docker.internal:host-gateway \
-    --name k8s-gr4-dev \
-    --env K8SGR4_LOG=debug \
-    --env K8SGR4_PORT=8080 \
-    --env MARIADB_HOST=host.docker.internal:3306 \
-    --env MARIADB_DATABASE=todolist \
-    --env MARIADB_USER=some-user \
-    --env MARIADB_PASSWORD=some-pwd \
-    --env MARIADB_TABLE=main \
+    --name k8s-gr4-app-dev \
+    -e K8SGR4_LOG=debug \
+    -e K8SGR4_SECRET=some-secret \
+    -e MARIADB_HOST=host.docker.internal:3306 \
+    -e MARIADB_DATABASE=todolist \
+    -e MARIADB_USER=gr4 \
+    -e MARIADB_PASSWORD=Gruppe4PI19dhge2022 \
+    -e MARIADB_TABLE=main \
     k8s-gr4/app-rust
