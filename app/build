@@ -1,9 +1,0 @@
-#!/bin/bash
-# compile application in a seperate container with static linking (see image ekidd/rust-musl-builder)
-docker run --rm -it \
-    -v "$PWD":/app \
-    -w /app \
-    ekidd/rust-musl-builder \
-    cargo build --release
-# build the docker image
-docker build -t k8s-gr4/app-rust --rm .

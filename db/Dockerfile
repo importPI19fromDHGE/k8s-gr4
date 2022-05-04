@@ -1,4 +1,9 @@
-FROM bitnami/mariadb-galera:latest
-ENV MARIADB_ROOT_PASSWORD=wirh4ben1SehrstarkesPasswort!!! MARIADB_ROOT_USER=admin MARIADB_USER=gr4 MARIADB_PASSWORD=Gruppe4PI19dhge2022 MARIADB_DATABASE=todolist MARIADB_GALERA_MARIABACKUP_PASSWORD=backupssindnichtueberbewertet
-WORKDIR /docker-entrypoint-initdb.d
-COPY schema.sql .
+FROM severalnines/mariadb:10.1
+ENV MYSQL_ROOT_PASSWORD=root-pwd
+ENV MYSQL_ROOT_USER=root
+ENV MYSQL_USER=some-user
+ENV MYSQL_PASSWORD=some-pwd
+ENV MYSQL_DATABASE=todolist
+ENV CLUSTER_NAME=mariadb_galera
+# WORKDIR /docker-entrypoint-initdb.d
+# COPY schema.sql .
