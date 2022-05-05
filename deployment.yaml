@@ -300,10 +300,9 @@ metadata:
   labels:
     run: k8sgr4
   annotations:
+    ingress.class: haproxy
     haproxy.org/check: "true"
-    haproxy.org/check-http: /api
 spec:
-  ingressClassName: haproxy
   rules:
   - http:
       paths:

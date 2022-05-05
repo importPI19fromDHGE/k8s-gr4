@@ -167,6 +167,7 @@ spec:
         args:
           - --configmap=haproxy-controller/haproxy-kubernetes-ingress
           - --default-backend-service=haproxy-controller/haproxy-kubernetes-ingress-default-backend
+          - --ingress.class=haproxy # important
         securityContext:
           runAsUser:  1000
           runAsGroup: 1000
@@ -220,8 +221,8 @@ metadata:
   namespace: haproxy-controller
 spec:
   externalIPs:
-    - 142.132.225.82
-    - 23.88.43.92
+    - 142.132.225.82  # important
+    - 23.88.43.92     # important
   selector:
     run: haproxy-ingress
   type: ClusterIP
