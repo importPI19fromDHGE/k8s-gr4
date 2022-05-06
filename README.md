@@ -29,6 +29,12 @@ cd k8s-gr4
 ./deploy.sh
 ```
 
+> insofern bereits ein funktionierender "haproxy-Controller" (Ingress) besteht und nicht überschrieben werden soll, \
+> sollte nur folgender Command ausgeführt werden:
+> ```sh
+> kubectl apply -f deployment.yaml
+> ```
+
 ### Testen
 
 Das Testskript führt GET,POST, GET/ID, DELETE/ID aus.
