@@ -40,6 +40,8 @@ cd k8s-gr4/app
 ./test.sh <IP> <id> some-secret
 ```
 
+![image](https://user-images.githubusercontent.com/26322754/167141321-562e7f02-8d53-41bc-978d-4ae0a233692b.png)
+
 ## Was passiert beim Deployment?
 
 Eine Reihe an `etcd`-Pods und -Services werden gestartet. 
