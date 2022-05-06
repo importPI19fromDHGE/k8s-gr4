@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use log::debug;
+use log::{debug, info, warn};
 use serde::{Serialize, Deserialize};
 use sqlx::{Pool, MySql};
 use futures::TryStreamExt;
@@ -111,5 +111,28 @@ impl SqlItemService {
         } else {
             json_error!("No SQL Error but no row was effected".to_string())
         }
+    }
+
+    pub async fn init(
+        pool: &Pool<MySql>,
+        table: String
+    ) {
+        // SHOW TABLES LIKE 'main'
+        let query = format!("SHOW TABLES LIKE '{}';", table);
+        match sqlx::query(query.as_str())
+            .fetch_one(pool)
+            .await {
+                Ok(_) => info!("ok-table {} found", table),
+                Err(_) => {
+                    warn!("Database not initialised, initialising...");
+                    let query = format!("create table {}(id int auto_increment, content varchar(255) not null, primary key(id));", table);
+                    match sqlx::query(query.as_str())
+                        .execute(pool)
+                        .await {
+                            Ok(x) => x,
+                            Err(err) => panic!("Couldn't create table {}. Err: {}", table, err)
+                        };
+                }
+            };
     }
 }

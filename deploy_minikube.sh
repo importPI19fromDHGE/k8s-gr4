@@ -10,11 +10,6 @@ cd app
 echo Loading Image 'k8s-gr4/app-rust' into minikube...
 minikube image load k8s-gr4/app-rust
 
-cd ../db
-docker build -t k8s-gr4/db .
-echo Loading Image 'k8s-gr4/db' into minikube...
-minikube image load k8s-gr4/db
-
 cd ..
 # uncomment if this is required -> install haproxy ingress
 # kubectl apply -f https://raw.githubusercontent.com/haproxytech/kubernetes-ingress/v1.7/deploy/haproxy-ingress.yaml

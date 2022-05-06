@@ -4,13 +4,20 @@ pub mod config;
 pub mod middleware;
 
 use log::{info, debug};
-use sqlx::MySqlPool;
+use sqlx::{MySqlPool, Pool, MySql};
 use actix_web::{App, HttpServer, web::Data, middleware::Logger};
+use std::{thread, time};
 
-use crate::config::ApplicationConfig;
+use crate::{config::ApplicationConfig, service::SqlItemService};
 
 #[actix_web::main]
 async fn main() {
+
+    let mut db_err = sqlx::Error::ColumnNotFound(String::from(""));
+    let mut pool: Option<Pool<MySql>> = None;
+    let max_retries: u8 = 3;
+    let retry_interval = time::Duration::from_secs(5);
+
     let config = ApplicationConfig::from_env();
 
     // Connect to given Database (mariaDB here)
@@ -23,18 +30,32 @@ async fn main() {
 
     debug!("{}", connection_uri.clone());
 
-    let pool = match MySqlPool::connect(connection_uri.as_str()).await {
-        Ok(pool) => {
-            info!("Successful connected to provide database on: [{}]", config.host);
-            pool
-        },
-        Err(err) => {
-            panic!("Error while connecting to database: {:?}", err)
+    for i in 0..max_retries {
+        match MySqlPool::connect(connection_uri.as_str()).await {
+            Ok(_pool) => {
+                info!("Successfully connected to provided database on: [{}]", config.host);
+                pool = Some(_pool);
+                break;
+            },
+            // todo: return error etc.
+            Err(err) => {
+                info!("Could not connect to database, retrying {} times...", max_retries - i);
+                thread::sleep(retry_interval);
+                db_err = err;
+                // panic!("Error while connecting to database: {:?}", err)
+            }
         }
-    };
+    }
 
-    // Setup Http Server with given controller configuration
+    let pool = pool
+        .expect(
+            format!("Error while connecting to database, {}", db_err.to_string()
+        ).as_str());
+
+    SqlItemService::init(&pool.clone(), config.table.clone()).await;
+
     let port = config.port;
+    // Setup Http Server with given controller configuration
     HttpServer::new(move || {
         App::new()
             .app_data( Data::new(pool.clone()) )

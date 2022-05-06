@@ -1,37 +1,271 @@
 # https://www.haproxy.com/documentation/kubernetes/latest/usage/ingress/
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: k8sgr4
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: k8sgr4
+  name: etcd-client
+spec:
+  ports:
+  - name: etcd-client-port
+    port: 2379
+    protocol: TCP
+    targetPort: 2379
+  selector:
+    app: etcd
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: k8sgr4
+  labels:
+    app: etcd
+    etcd_node: etcd0
+  name: etcd0
+spec:
+  containers:
+  - command:
+    - /usr/local/bin/etcd
+    - --name
+    - etcd0
+    - --initial-advertise-peer-urls
+    - http://etcd0:2380
+    - --listen-peer-urls
+    - http://0.0.0.0:2380
+    - --listen-client-urls
+    - http://0.0.0.0:2379
+    - --advertise-client-urls
+    - http://etcd0:2379
+    - --initial-cluster
+    - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+    - --initial-cluster-state
+    - new
+    image: quay.io/coreos/etcd:latest
+    name: etcd0
+    ports:
+    - containerPort: 2379
+      name: client
+      protocol: TCP
+    - containerPort: 2380
+      name: server
+      protocol: TCP
+  restartPolicy: Never
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: k8sgr4
+  labels:
+    etcd_node: etcd0
+  name: etcd0
+spec:
+  ports:
+  - name: client
+    port: 2379
+    protocol: TCP
+    targetPort: 2379
+  - name: server
+    port: 2380
+    protocol: TCP
+    targetPort: 2380
+  selector:
+    etcd_node: etcd0
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: k8sgr4
+  labels:
+    app: etcd
+    etcd_node: etcd1
+  name: etcd1
+spec:
+  containers:
+  - command:
+    - /usr/local/bin/etcd
+    - --name
+    - etcd1
+    - --initial-advertise-peer-urls
+    - http://etcd1:2380
+    - --listen-peer-urls
+    - http://0.0.0.0:2380
+    - --listen-client-urls
+    - http://0.0.0.0:2379
+    - --advertise-client-urls
+    - http://etcd1:2379
+    - --initial-cluster
+    - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+    - --initial-cluster-state
+    - new
+    image: quay.io/coreos/etcd:latest
+    name: etcd1
+    ports:
+    - containerPort: 2379
+      name: client
+      protocol: TCP
+    - containerPort: 2380
+      name: server
+      protocol: TCP
+  restartPolicy: Never
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: k8sgr4
+  labels:
+    etcd_node: etcd1
+  name: etcd1
+spec:
+  ports:
+  - name: client
+    port: 2379
+    protocol: TCP
+    targetPort: 2379
+  - name: server
+    port: 2380
+    protocol: TCP
+    targetPort: 2380
+  selector:
+    etcd_node: etcd1
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: k8sgr4
+  labels:
+    app: etcd
+    etcd_node: etcd2
+  name: etcd2
+spec:
+  containers:
+  - command:
+    - /usr/local/bin/etcd
+    - --name
+    - etcd2
+    - --initial-advertise-peer-urls
+    - http://etcd2:2380
+    - --listen-peer-urls
+    - http://0.0.0.0:2380
+    - --listen-client-urls
+    - http://0.0.0.0:2379
+    - --advertise-client-urls
+    - http://etcd2:2379
+    - --initial-cluster
+    - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+    - --initial-cluster-state
+    - new
+    image: quay.io/coreos/etcd:latest
+    name: etcd2
+    ports:
+    - containerPort: 2379
+      name: client
+      protocol: TCP
+    - containerPort: 2380
+      name: server
+      protocol: TCP
+  restartPolicy: Never
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: k8sgr4
+  labels:
+    etcd_node: etcd2
+  name: etcd2
+spec:
+  ports:
+  - name: client
+    port: 2379
+    protocol: TCP
+    targetPort: 2379
+  - name: server
+    port: 2380
+    protocol: TCP
+    targetPort: 2380
+  selector:
+    etcd_node: etcd2
+
+---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: k8sgr4
   name: k8sgr4
   labels: 
-    app: k8sgr4
+    run: k8sgr4
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: k8sgr4
+      run: k8sgr4
   template:
     metadata:
       labels:
-        app: k8sgr4
+        run: k8sgr4
     spec:
       volumes:
       - name: vol
         emptyDir: {}
       containers:
         - name: app
-          image: k8s-gr4/app-rust
-          imagePullPolicy: Never
+          image: photovoltex/k8sgr4-app
+          env:
+            - name: K8SGR4_LOG
+              value: info
+            - name: K8SGR4_SECRET
+              value: some-secret
+            - name: K8SGR4_PORT
+              value: "8080"
+            - name: MARIADB_HOST
+              value: 127.0.0.1:3306
+            - name: MARIADB_DATABASE
+              value: todolist
+            - name: MARIADB_USER
+              value: k8sgr4
+            - name: MARIADB_PASSWORD
+              value: k8spwdgr4123!
+            - name: MARIADB_TABLE
+              value: main
           ports:
           - containerPort: 8080
             name: api
         - name: db
-          image: k8s-gr4/db
-          imagePullPolicy: Never
+          image: severalnines/mariadb
           env:
             - name: DISCOVERY_SERVICE
               value: etcd-client:2379
+            - name: MYSQL_ROOT_PASSWORD
+              value: root-pwd
+            - name: MYSQL_ROOT_USER
+              value: root
+            - name: MYSQL_USER
+              value: k8sgr4
+            - name: MYSQL_PASSWORD
+              value: k8spwdgr4123!
+            - name: MYSQL_DATABASE
+              value: todolist
+            - name: CLUSTER_NAME
+              value: mariadb_galera
           volumeMounts:
           - mountPath: /bitnami/mariadb/
             name: vol
@@ -43,15 +277,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: k8sgr4
   name: k8sgr4-service
 spec:
-  type: NodePort
   selector:
-    app: k8sgr4
+    run: k8sgr4
   ports:
   - name: api
     protocol: TCP
-    port: 8080 # gets trashed by the ingress (doesn't matter what it is)
+    port: 8080
     targetPort: 8080
 ---
 
@@ -61,17 +295,18 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  namespace: k8sgr4
   name: k8sgr4-ingress
   labels:
-    app: k8sgr4
+    run: k8sgr4
   annotations:
-    haproxy.org/path-rewrite: "/"
-    kubernetes.io/ingress.class: haproxy
+    ingress.class: haproxy
+    haproxy.org/check: "true"
 spec:
   rules:
   - http:
       paths:
-      - path: /api # this doesn't seem to affect some routing?
+      - path: /
         pathType: Prefix
         backend:
           service:

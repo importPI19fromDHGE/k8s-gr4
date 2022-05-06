@@ -12,9 +12,45 @@ Verteilte Systeme - Kubernetes - Klausurersatzleistung Gruppe 4
 
 # Quick-Start
 
+## Voraussetzungen
+
+- ein eingerichtetes Kubernetes Cluster
+- ein Netzwerkplugin (wie bspw. `flannel`) muss auf dem Cluster installiert sein
+
+## Deployment
+
 ```bash
 git clone https://github.com/importPI19fromDHGE/k8s-gr4.git
 ```
+- in `patch-deploy-nodes.yaml` die IP-Adressen der verfügbaren Nodes eintragen
+- `deploy.sh` ausführen
+```bash
+cd k8s-gr4
+./deploy.sh
+```
+
+### Testen
+
+Das Testskript führt GET,POST, GET/ID, DELETE/ID aus.
+`<IP>` ersetzen durch eine erreichbare IP im Format `111.222.333.000`.
+`<id>` ersetzen durch id des Datenbank Eintrags.
+
+```bash
+cd k8s-gr4/app
+./test.sh <IP> <id> some-secret
+```
+
+## Was passiert beim Deployment?
+
+Eine Reihe an `etcd`-Pods und -Services werden gestartet. 
+Diese sorgen dafür, dass die Datenbanken sich später finden und synchronisieren können.
+
+Es wird ein Deployment mit App-DB-Pods angelegt.
+Hier wird die eigentliche Anwendung repliziert ausgeführt.
+
+Für die Kommunikation mit den Anwendungen wird ein Service angelegt.
+Damit dieser von außerhalb des Clusters erreichbar ist, wird zusätzlich ein Ingress angelegt.
+Das Load-Balancing wird mithilfe eines haproxy-Controllers realisiert.
 
 # Dokumentation: Ein Kubernetes-Cluster einrichten
 
